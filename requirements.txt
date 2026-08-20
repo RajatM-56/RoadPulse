@@ -1,0 +1,16 @@
+# Core detection / tracking
+ultralytics>=8.4
+
+# Image / video processing
+opencv-python-headless>=4.8
+
+# HuggingFace datasets (BMD-45 download)
+datasets>=2.14
+huggingface_hub>=0.17
+
+# Google Drive download fallback
+gdown>=4.7
+
+# Utilities
+tqdm>=4.65
+Pillow>=10.0

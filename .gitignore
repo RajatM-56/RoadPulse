@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data — large files, download via scripts
+data/bmd45/
+data/visdrone/
+data/uavdt/
+data/utuav/
+data/dronevehicle/
+data/sample_clips/*.mp4
+data/sample_clips/*.avi
+
+# Model weights — downloaded or trained, not committed
+models/**/*.pt
+models/**/*.pth
+models/**/*.onnx
+
+# Outputs — generated per-run
+outputs/
+
+# Eval reports — can be regenerated
+eval/
+
+# Jupyter / Colab
+.ipynb_checkpoints/
+*.ipynb
+
+# Misc
+*.log
+*.tar.gz
+*.zip

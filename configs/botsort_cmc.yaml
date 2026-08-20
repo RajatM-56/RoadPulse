@@ -1,0 +1,39 @@
+# BoT-SORT configuration for drone feeds with CMC (Camera Motion Compensation)
+# Reference: ultralytics/cfg/trackers/botsort.yaml
+# CMC is REQUIRED for drone footage — platform jitter corrupts speed/direction without it.
+# Phase 2 will tune these parameters for drone traffic scenarios.
+
+tracker_type: botsort
+
+# Detection threshold for first association (high-conf detections)
+track_high_thresh: 0.5
+
+# Detection threshold for second association (low-conf detections)
+track_low_thresh: 0.1
+
+# Threshold for unconfirmed tracks
+new_track_thresh: 0.6
+
+# Number of frames to keep lost tracks alive
+track_buffer: 30
+
+# IoU threshold for matching
+match_thresh: 0.8
+
+# --- CMC (Camera Motion Compensation) ---
+# Options: sparseOptFlow, orb, sift, ecc, none
+# sparseOptFlow is fastest and sufficient for typical drone jitter
+gmc_method: sparseOptFlow
+
+# --- Appearance ReID ---
+# Enable appearance-based re-identification for better ID persistence
+# through occlusions. Adds compute overhead.
+with_reid: true
+
+# Proximity threshold for combining appearance + motion cues
+proximity_thresh: 0.5
+
+# Appearance similarity threshold
+appearance_thresh: 0.25
+
+fuse_score: true

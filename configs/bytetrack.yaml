@@ -1,0 +1,24 @@
+# ByteTrack configuration for fixed-camera feeds
+# Reference: ultralytics/cfg/trackers/bytetrack.yaml
+# Phase 2 will tune these parameters for traffic scenarios
+
+tracker_type: bytetrack
+
+# Detection threshold for first association (high-conf detections)
+track_high_thresh: 0.5
+
+# Detection threshold for second association (low-conf detections)
+track_low_thresh: 0.1
+
+# Threshold for unconfirmed tracks
+new_track_thresh: 0.6
+
+# Number of frames to keep lost tracks alive
+track_buffer: 30
+
+# IoU threshold for matching
+match_thresh: 0.8
+
+# Minimum box area to consider (in pixels^2)
+# Set to 10 to filter out tiny noise detections
+fuse_score: true
