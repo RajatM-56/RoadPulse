@@ -25,10 +25,9 @@ match_thresh: 0.8
 # sparseOptFlow is fastest and sufficient for typical drone jitter
 gmc_method: sparseOptFlow
 
-# --- Appearance ReID ---
 # Enable appearance-based re-identification for better ID persistence
-# through occlusions. Adds compute overhead.
-with_reid: true
+with_reid: false
+model: "auto"
 
 # Proximity threshold for combining appearance + motion cues
 proximity_thresh: 0.5
