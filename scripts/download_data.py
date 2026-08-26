@@ -147,17 +147,53 @@ def generate_synthetic_clip(dest_path, clip_type="fixed"):
             cv2.line(frame, (x, height // 2), (x + 25, height // 2),
                      (200, 200, 200), 2)
 
-        # Draw and move vehicles
-        for v in vehicles:
-            cv2.rectangle(frame,
-                          (int(v["x"]), int(v["y"])),
-                          (int(v["x"] + v["w"]), int(v["y"] + v["h"])),
-                          v["color"], -1)
-            # Windshield
-            cv2.rectangle(frame,
-                          (int(v["x"] + 5), int(v["y"] + 3)),
-                          (int(v["x"] + v["w"] - 5), int(v["y"] + v["h"] // 3)),
-                          (180, 220, 240), -1)
+    # Crop bus vehicle from ultralytics bus.jpg asset
+    import ultralytics
+    assets_path = os.path.join(os.path.dirname(ultralytics.__file__), "assets", "bus.jpg")
+    bus_crop = None
+    if os.path.exists(assets_path):
+        img_bus = cv2.imread(assets_path)
+        if img_bus is not None:
+            # Crop the bus region (y:220..730, x:0..800)
+            bus_crop = img_bus[220:730, 0:790]
+
+    for frame_idx in range(total_frames):
+        # Road background
+        frame = np.full((height, width, 3), (70, 75, 80), dtype=np.uint8)
+
+        # Road markings / lanes
+        cv2.line(frame, (0, 200), (width, 200), (255, 255, 255), 3)
+        cv2.line(frame, (0, 520), (width, 520), (255, 255, 255), 3)
+
+        # Dashed center line
+        for x_start in range(0, width, 80):
+            offset = int((frame_idx * 5) % 80)
+            x = (x_start + offset) % width
+            cv2.line(frame, (x, 360), (min(x + 40, width), 360), (240, 240, 240), 2)
+
+        # Move and render bus/vehicles
+        if bus_crop is not None:
+            # Vehicle 1: Bus moving left to right
+            bw, bh = 260, 160
+            resized_bus = cv2.resize(bus_crop, (bw, bh))
+            bx1 = int((frame_idx * 6) % (width + bw)) - bw
+            by1 = 230
+            if 0 <= bx1 < width - bw:
+                frame[by1:by1+bh, bx1:bx1+bw] = resized_bus
+
+            # Vehicle 2: Bus moving right to left
+            bw2, bh2 = 220, 140
+            resized_bus2 = cv2.resize(bus_crop, (bw2, bh2))
+            bx2 = width - int((frame_idx * 5) % (width + bw2))
+            by2 = 380
+            if 0 <= bx2 < width - bw2:
+                frame[by2:by2+bh2, bx2:bx2+bw2] = resized_bus2
+        else:
+            # Fallback mock rectangles
+            for v in vehicles:
+                cv2.rectangle(frame, (int(v["x"]), int(v["y"])),
+                              (int(v["x"] + v["w"]), int(v["y"] + v["h"])),
+                              v["color"], -1)
 
             v["x"] = (v["x"] + v["dx"]) % (width - v["w"])
             v["y"] = max(height // 4,
