@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchSummary();
   fetchCameras();
   fetchAnalytics();
+  startLiveClock();
 
   // Scroll listener for dynamic landing nav pill tracking
   window.addEventListener("scroll", () => {
@@ -216,12 +217,30 @@ async function fetchSummary() {
 
     if (data.incidents) {
       allIncidents = data.incidents;
+
+      // Total active incidents
       const incEl = document.getElementById("stat-incidents");
       if (incEl) incEl.innerText = data.incidents.length;
+
+      // High / Med severity counts
+      const highCount = data.incidents.filter(i => i.severity >= 0.75).length;
+      const medCount  = data.incidents.filter(i => i.severity >= 0.4 && i.severity < 0.75).length;
+      const resolvedCount = data.incidents.filter(i => i.lifecycle_status === "Resolved").length;
+
+      const highEl = document.getElementById("stat-high-sev");
+      const medEl  = document.getElementById("stat-med-sev");
+      const resEl  = document.getElementById("stat-resolved");
+      const subEl  = document.getElementById("stat-incidents-sub");
+
+      if (highEl) highEl.innerText = highCount;
+      if (medEl)  medEl.innerText  = medCount;
+      if (resEl)  resEl.innerText  = resolvedCount;
+      if (subEl)  subEl.innerText  = `${highCount} Critical · ${medCount} Warning`;
 
       renderIncidentFeed(data.incidents);
       renderIncidentsTable(data.incidents);
       renderAlertsPage(data.incidents);
+      updateActivityTicker(data.incidents);
 
       const highSev = data.incidents.find(i => i.severity > 0.75 && i.lifecycle_status === "New");
       if (highSev && !sessionStorage.getItem("roadpulse_alert_dismissed")) {
@@ -238,6 +257,142 @@ async function fetchSummary() {
     console.error("Error fetching summary:", err);
   }
 }
+
+// --- Live Clock ---
+function startLiveClock() {
+  function tick() {
+    const el = document.getElementById("live-clock");
+    if (!el) return;
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, "0");
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const yyyy = now.getFullYear();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const min = String(now.getMinutes()).padStart(2, "0");
+    const ss = String(now.getSeconds()).padStart(2, "0");
+    el.textContent = `${dd}/${mm}/${yyyy}  ${hh}:${min}:${ss}`;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// --- Activity Ticker ---
+function updateActivityTicker(incidents) {
+  const ticker = document.getElementById("activity-ticker");
+  if (!ticker || !incidents || incidents.length === 0) return;
+
+  const makeItem = (inc) => {
+    const sev = inc.severity >= 0.75 ? "🔴" : "🟡";
+    const isDrone = inc.incident_id.includes("DRONE") || inc.incident_id.includes("DRN");
+    const camTag = isDrone
+      ? `<span style="font-size:0.68rem; background:#fef3c7; color:#92400e; border-radius:4px; padding:0.1rem 0.35rem; margin-left:0.3rem; font-weight:700;">🚁 Drone</span>`
+      : `<span style="font-size:0.68rem; background:#eff6ff; color:#1e40af; border-radius:4px; padding:0.1rem 0.35rem; margin-left:0.3rem; font-weight:700;">📷 Fixed</span>`;
+    return `<button onclick="loadIncidentIntoPlayer('${inc.incident_id}')" style="
+        background: none; border: 1px solid transparent; border-radius: 6px;
+        padding: 0.2rem 0.55rem; cursor: pointer; font-size: 0.78rem;
+        color: var(--text-muted); font-weight: 500; white-space: nowrap;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        font-family: var(--font-body); display: inline-flex; align-items: center; gap: 0.25rem;
+      " onmouseenter="this.style.background='#fff7ed'; this.style.borderColor='var(--primary-blue)'; this.style.color='var(--primary-blue)';"
+         onmouseleave="this.style.background='none'; this.style.borderColor='transparent'; this.style.color='var(--text-muted)';"
+         title="Click to load ${inc.incident_id} in player">
+      ${sev} <strong>${inc.incident_id}</strong> · ${inc.type} · ${inc.zone || 'Zone'} ${camTag}
+    </button>
+    <span style="color: #cbd5e1; padding: 0 0.1rem;">|</span>`;
+  };
+
+  const items = incidents.slice(0, 8).map(makeItem).join("");
+  // Duplicate for seamless loop
+  ticker.innerHTML = items + items;
+}
+
+// Load a ticker-clicked incident into the main video player on the dashboard
+function loadIncidentIntoPlayer(incidentId) {
+  const inc = allIncidents.find(i => i.incident_id === incidentId);
+  if (!inc) return;
+
+  // Switch to the right clip
+  const isDrone = incidentId.includes("DRONE") || incidentId.includes("DRN");
+  currentClip = isDrone ? "drone_sample" : "fixed_cam_sample";
+  setVideoLayer("incidents");
+
+  // Sync the dropdown
+  const select = document.getElementById("clip-select");
+  if (select) select.value = currentClip;
+
+  // Update player title
+  const titleEl = document.getElementById("player-title");
+  const camLabel = isDrone ? "Drone Aerial" : "Fixed Camera Traffic";
+  if (titleEl) titleEl.innerText = `${camLabel} — ${inc.type} · ${inc.incident_id}`;
+
+  // Load and seek the video
+  const video = document.getElementById("main-video");
+  const videoSrc = `/media/outputs/incidents/${currentClip}_incidents.mp4`;
+  if (video) {
+    video.src = videoSrc;
+    const targetSec = Math.max(0, (inc.timestamp_s || 0) - 5);
+    video.addEventListener("loadedmetadata", () => {
+      video.currentTime = targetSec;
+      video.play().catch(e => console.log("Autoplay:", e));
+    }, { once: true });
+    video.load();
+  }
+
+  // Flash-highlight the video panel
+  const panel = document.getElementById("video-panel");
+  if (panel) {
+    panel.style.transition = "box-shadow 0.2s ease";
+    panel.style.boxShadow = "0 0 0 3px var(--primary-blue)";
+    setTimeout(() => { panel.style.boxShadow = ""; }, 1200);
+  }
+
+  // Scroll the video panel into view
+  const wrap = document.getElementById("video-container-wrap");
+  if (wrap) wrap.scrollIntoView({ behavior: "smooth", block: "center" });
+
+  showToast(`📹 Loaded ${inc.incident_id} in player — seeking to ${formatTimestamp(inc.timestamp_s)}`, "success");
+}
+
+// --- Quick Action Handlers ---
+function quickAcknowledgeAll() {
+  const newOnes = allIncidents.filter(i => i.lifecycle_status === "New");
+  if (newOnes.length === 0) { showToast("No new incidents to acknowledge.", "info"); return; }
+  newOnes.forEach(i => updateLifecycle(i.incident_id, "Acknowledged"));
+  showToast(`✅ ${newOnes.length} incident(s) acknowledged.`, "success");
+}
+
+function quickResolveAll() {
+  const unresolved = allIncidents.filter(i => i.lifecycle_status !== "Resolved");
+  if (unresolved.length === 0) { showToast("All incidents already resolved.", "info"); return; }
+  unresolved.forEach(i => updateLifecycle(i.incident_id, "Resolved"));
+  showToast(`✅ ${unresolved.length} incident(s) marked resolved.`, "success");
+}
+
+// --- Video Fullscreen Toggle ---
+function toggleVideoFullscreen() {
+  const wrap = document.getElementById("video-container-wrap");
+  const btn  = document.querySelector("[onclick='toggleVideoFullscreen()']");
+  if (!wrap) return;
+
+  if (wrap.classList.contains("fullscreen-mode")) {
+    wrap.classList.remove("fullscreen-mode");
+    document.body.style.overflow = "";
+    if (btn) btn.innerHTML = '<i data-lucide="maximize-2" style="width:15px;height:15px;"></i>';
+  } else {
+    wrap.classList.add("fullscreen-mode");
+    document.body.style.overflow = "hidden";
+    if (btn) btn.innerHTML = '<i data-lucide="minimize-2" style="width:15px;height:15px;"></i>';
+  }
+  if (window.lucide) lucide.createIcons();
+
+  // Close on Escape key
+  document.onkeydown = (e) => {
+    if (e.key === "Escape" && wrap.classList.contains("fullscreen-mode")) {
+      toggleVideoFullscreen();
+    }
+  };
+}
+
 
 async function fetchCameras() {
   try {
@@ -1273,6 +1428,18 @@ function changeClipSource() {
 function setVideoLayer(layer) {
   currentLayer = layer;
   updateVideoSource();
+
+  const btnInc = document.getElementById("layer-btn-incidents");
+  const btnRaw = document.getElementById("layer-btn-raw");
+  if (btnInc && btnRaw) {
+    if (layer === "incidents") {
+      btnInc.classList.add("btn-primary");
+      btnRaw.classList.remove("btn-primary");
+    } else {
+      btnRaw.classList.add("btn-primary");
+      btnInc.classList.remove("btn-primary");
+    }
+  }
 }
 
 function updateVideoSource() {

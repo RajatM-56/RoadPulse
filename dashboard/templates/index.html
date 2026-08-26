@@ -265,32 +265,103 @@
 
   <!-- SCREEN 2: LIVE DASHBOARD -->
   <div id="screen-dashboard" class="screen-container app-container" style="display: none;">
+
+
     <!-- Top Summary Stat Cards -->
     <div class="stats-grid">
-      <div class="stat-card">
+      <div class="stat-card" style="cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(239,68,68,0.15)'" onmouseleave="this.style.transform=''; this.style.boxShadow=''">
         <span class="stat-title">Active Incident Alerts</span>
-        <span class="stat-value" id="stat-incidents" style="color: var(--accent-rose);">3</span>
-        <span class="stat-subtext">2 Critical &bull; 1 Warning</span>
+        <span class="stat-value" id="stat-incidents" style="color: var(--accent-rose);">—</span>
+        <span class="stat-subtext" id="stat-incidents-sub">Loading…</span>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" style="cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(239,68,68,0.15)'" onmouseleave="this.style.transform=''; this.style.boxShadow=''">
         <span class="stat-title">High Severity</span>
-        <span class="stat-value" style="color: var(--accent-rose);">2</span>
+        <span class="stat-value" id="stat-high-sev" style="color: var(--accent-rose);">—</span>
         <span class="stat-subtext">Immediate Operator Action</span>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" style="cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(245,158,11,0.15)'" onmouseleave="this.style.transform=''; this.style.boxShadow=''">
         <span class="stat-title">Medium Severity</span>
-        <span class="stat-value" style="color: var(--accent-amber);">1</span>
+        <span class="stat-value" id="stat-med-sev" style="color: var(--accent-amber);">—</span>
         <span class="stat-subtext">Monitoring Required</span>
       </div>
-      <div class="stat-card">
-        <span class="stat-title">Low Severity</span>
-        <span class="stat-value" style="color: var(--primary-blue);">0</span>
-        <span class="stat-subtext">Normal Traffic Flow</span>
+      <div class="stat-card" style="cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(59,130,246,0.12)'" onmouseleave="this.style.transform=''; this.style.boxShadow=''">
+        <span class="stat-title">Resolved Today</span>
+        <span class="stat-value" id="stat-resolved" style="color: var(--accent-emerald);">—</span>
+        <span class="stat-subtext">Closed by operators</span>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" style="cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(16,185,129,0.15)'" onmouseleave="this.style.transform=''; this.style.boxShadow=''">
         <span class="stat-title">Cameras Online</span>
         <span class="stat-value" style="color: var(--accent-emerald);">4 / 4</span>
         <span class="stat-subtext">2 CCTV &bull; 2 Drone UAVs</span>
+      </div>
+    </div>
+
+    <!-- Quick Actions Toolbar -->
+    <div class="card-panel" style="background: linear-gradient(135deg, #ffffff 0%, #fffbf5 100%); border-left: 5px solid var(--primary-blue); padding: 0.85rem 1.25rem; box-shadow: var(--shadow-sm); border-radius: 12px; margin-bottom: 1rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        
+        <!-- Left Side: Title & Info Badge -->
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="display: flex; align-items: center; justify-content: center; background: #fff7ed; border: 1px solid #ffedd5; width: 34px; height: 34px; border-radius: 8px;">
+            <i data-lucide="zap" style="width: 16px; height: 16px; color: var(--primary-blue);"></i>
+          </div>
+          <div>
+            <h4 style="margin: 0; font-size: 0.88rem; font-weight: 800; color: var(--text-main); font-family: var(--font-heading);">Incident Quick Actions</h4>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Perform batch operations on current events</span>
+          </div>
+        </div>
+
+        <!-- Right Side: Interactive Option Buttons -->
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;">
+          <!-- Acknowledge All -->
+          <button class="btn" onclick="quickAcknowledgeAll()" style="
+            background: #fffbeb; border: 1px solid #fde68a; color: #b45309; 
+            padding: 0.5rem 0.95rem; border-radius: 8px; font-weight: 700; font-size: 0.78rem; 
+            display: flex; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.15s ease;"
+            onmouseenter="this.style.background='#fef3c7'; this.style.transform='translateY(-1px)';"
+            onmouseleave="this.style.background='#fffbeb'; this.style.transform='';"
+          >
+            <i data-lucide="check" style="width: 14px; height: 14px;"></i> Acknowledge All New
+          </button>
+          
+          <!-- Resolve All -->
+          <button class="btn" onclick="quickResolveAll()" style="
+            background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; 
+            padding: 0.5rem 0.95rem; border-radius: 8px; font-weight: 700; font-size: 0.78rem; 
+            display: flex; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.15s ease;"
+            onmouseenter="this.style.background='#dcfce7'; this.style.transform='translateY(-1px)';"
+            onmouseleave="this.style.background='#f0fdf4'; this.style.transform='';"
+          >
+            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> Resolve All
+          </button>
+
+          <!-- Divider -->
+          <div style="width: 1px; height: 24px; background: var(--border-color); margin: 0 0.25rem;"></div>
+
+          <!-- Export CSV -->
+          <button class="btn" onclick="exportIncidentsCSV()" style="
+            background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); 
+            padding: 0.5rem 0.95rem; border-radius: 8px; font-weight: 600; font-size: 0.78rem; 
+            display: flex; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.15s ease;"
+            onmouseenter="this.style.background='#fafaf9'; this.style.borderColor='#e7e5e4'; this.style.transform='translateY(-1px)';"
+            onmouseleave="this.style.background='#ffffff'; this.style.borderColor='var(--border-color)'; this.style.transform='';"
+          >
+            <i data-lucide="download" style="width: 14px; height: 14px;"></i> Export Log
+          </button>
+
+          <!-- Register -->
+          <button class="btn btn-primary" onclick="showScreen('incidents')" style="
+            background: var(--primary-blue); border: 1px solid var(--primary-blue); color: #ffffff; 
+            padding: 0.5rem 0.95rem; border-radius: 8px; font-weight: 700; font-size: 0.78rem; 
+            display: flex; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.15s ease;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.2);"
+            onmouseenter="this.style.background='#d97706'; this.style.transform='translateY(-1px)';"
+            onmouseleave="this.style.background='var(--primary-blue)'; this.style.transform='';"
+          >
+            <i data-lucide="list" style="width: 14px; height: 14px;"></i> Incident Register
+          </button>
+        </div>
+
       </div>
     </div>
 
@@ -299,7 +370,7 @@
       <div class="panel-header">
         <div class="panel-title">
           <i data-lucide="map-pin" style="color: var(--primary-blue);"></i>
-          <span>Electronics City Traffic Operations Map & Coverage-Gap Overlay</span>
+          <span>Electronics City Traffic Operations Map &amp; Coverage-Gap Overlay</span>
         </div>
         <span class="badge" style="background: #dcfce7; color: var(--accent-emerald);">● Live Zone Grid Active</span>
       </div>
@@ -309,29 +380,32 @@
     <!-- Main Workspace Split Grid -->
     <div class="main-workspace">
       <!-- Video Stream Workspace -->
-      <div class="card-panel">
+      <div class="card-panel" id="video-panel">
         <div class="panel-header">
           <div class="panel-title">
             <i data-lucide="camera" style="color: var(--primary-blue);"></i>
             <span id="player-title">Fixed Camera Traffic — Incident Alerts Stream</span>
           </div>
-          <select id="clip-select" class="btn" onchange="changeClipSource()">
-            <option value="fixed_cam_sample">Fixed Camera (Traffic Junction)</option>
-            <option value="drone_sample">Drone Camera (Aerial View)</option>
-          </select>
+          <div style="display: flex; gap: 0.4rem; align-items: center;">
+            <select id="clip-select" class="btn" onchange="changeClipSource()">
+              <option value="fixed_cam_sample">Fixed Camera (Traffic Junction)</option>
+              <option value="drone_sample">Drone Camera (Aerial View)</option>
+            </select>
+            <button class="btn" onclick="toggleVideoFullscreen()" title="Fullscreen" style="padding: 0.35rem 0.55rem;">
+              <i data-lucide="maximize-2" style="width: 15px; height: 15px;"></i>
+            </button>
+          </div>
         </div>
 
-        <div class="video-container">
+        <div class="video-container" id="video-container-wrap">
           <video id="main-video" controls autoplay loop muted>
             <source src="/media/outputs/incidents/fixed_cam_sample_incidents.mp4" type="video/mp4">
           </video>
         </div>
 
         <div class="video-controls-row">
-          <button class="btn btn-primary" onclick="setVideoLayer('incidents')"><i data-lucide="shield-alert"></i> Incident Alerts</button>
-          <button class="btn" onclick="setVideoLayer('tracked')"><i data-lucide="route"></i> Tracked Stream</button>
-          <button class="btn" onclick="setVideoLayer('annotated')"><i data-lucide="eye"></i> Batch Detections</button>
-          <button class="btn" onclick="setVideoLayer('raw')"><i data-lucide="video-off"></i> Raw Feed</button>
+          <button id="layer-btn-incidents" class="btn btn-primary" onclick="setVideoLayer('incidents')"><i data-lucide="shield-alert"></i> AI Alert Overlay</button>
+          <button id="layer-btn-raw" class="btn" onclick="setVideoLayer('raw')"><i data-lucide="video"></i> Clean Camera Feed</button>
         </div>
       </div>
 
@@ -342,11 +416,27 @@
             <i data-lucide="bell" style="color: var(--accent-rose);"></i>
             <span>Recent Event Feed</span>
           </div>
-          <button class="btn" onclick="showScreen('incidents')" style="font-size: 0.78rem;">View All Incidents</button>
+          <button class="btn" onclick="showScreen('incidents')" style="font-size: 0.78rem;">View All</button>
         </div>
         <div class="event-feed-list" id="incident-feed-container"></div>
       </div>
     </div>
+
+    <!-- Scrolling Live Activity Ticker -->
+    <div class="card-panel" style="padding: 0.65rem 1.1rem; overflow: hidden;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; font-size: 0.74rem; font-weight: 800; color: var(--accent-rose); text-transform: uppercase; letter-spacing: 0.5px; padding-right: 0.75rem; border-right: 2px solid var(--border-color);">
+          <span style="width: 7px; height: 7px; background: var(--accent-rose); border-radius: 50%; display: inline-block; animation: pulse-green 1.2s infinite;"></span>
+          Live Feed
+        </div>
+        <div style="overflow: hidden; flex: 1; position: relative;">
+          <div id="activity-ticker" style="display: flex; gap: 2rem; font-size: 0.78rem; color: var(--text-muted); font-weight: 500; animation: ticker-scroll 28s linear infinite; white-space: nowrap; will-change: transform;">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- SCREEN 3: INCIDENTS TABLE -->
