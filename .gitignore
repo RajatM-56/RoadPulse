@@ -52,3 +52,8 @@ eval/
 *.log
 *.tar.gz
 *.zip
+.coverage
+test_*.mp4
+test_*.webm
+*.pt
+dashboard/static/images/logo_cropped.png

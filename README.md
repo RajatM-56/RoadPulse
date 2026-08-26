@@ -8,9 +8,7 @@ wrong-way driving, collision-linked congestion) with severity/confidence scores.
 
 ## Scope
 
-This repo contains the **ML/CV pipeline only** — no dashboard, no UI, no
-streaming. Everything runs in **batch mode**: a folder of pre-recorded video
-clips goes in, annotated videos + structured incident logs come out.
+This repo contains the **RoadPulse ML/CV pipeline** — featuring both **batch processing** (video folders → structured logs + annotated MP4s) and an interactive **Web Dashboard UI** ([`dashboard/server.py`](file:///Users/ratnamsmac/Documents/Projects/Elcia/dashboard/server.py)) for real-time telemetry, track inspection, and pipeline controls.
 
 ## Project Structure
 

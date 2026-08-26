@@ -101,19 +101,24 @@ class VideoWriter:
     """
 
     def __init__(self, output_path: str, fps: float, width: int, height: int,
-                 codec: str = "mp4v"):
+                 codec: str = "avc1"):
         """
         Args:
             output_path: Path for the output video file.
             fps: Frames per second.
             width: Frame width in pixels.
             height: Frame height in pixels.
-            codec: FourCC codec string (default: mp4v for .mp4 files).
+            codec: FourCC codec string (default: avc1 for H.264 HTML5 video playback).
         """
         os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
 
         fourcc = cv2.VideoWriter_fourcc(*codec)
         self.writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+        if not self.writer.isOpened():
+            # Fallback to mp4v if avc1 is unavailable in opencv build
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            self.writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
         self.output_path = output_path
         self.frame_count = 0
 
@@ -122,7 +127,7 @@ class VideoWriter:
 
     @classmethod
     def from_capture(cls, cap: cv2.VideoCapture, output_path: str,
-                     codec: str = "mp4v") -> "VideoWriter":
+                     codec: str = "avc1") -> "VideoWriter":
         """Create a VideoWriter matching a source cv2.VideoCapture."""
         fps = cap.get(cv2.CAP_PROP_FPS) or 25.0
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -135,8 +140,27 @@ class VideoWriter:
         self.frame_count += 1
 
     def release(self):
-        """Finalise and close the video file."""
+        """Finalise and close the video file, ensuring H.264 browser compatibility."""
         self.writer.release()
+        # Post-process with ffmpeg if available to guarantee HTML5 H.264 playback
+        import shutil, subprocess
+        ffmpeg_bin = shutil.which("ffmpeg")
+        if ffmpeg_bin and os.path.exists(self.output_path) and os.path.getsize(self.output_path) > 0:
+            temp_path = f"{self.output_path}.h264.mp4"
+            cmd = [
+                ffmpeg_bin, "-y", "-i", self.output_path,
+                "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                "-profile:v", "baseline", "-level", "3.0",
+                "-movflags", "+faststart",
+                temp_path
+            ]
+            try:
+                subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+                if os.path.exists(temp_path) and os.path.getsize(temp_path) > 0:
+                    os.replace(temp_path, self.output_path)
+            except Exception:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
 
     def __enter__(self):
         return self
