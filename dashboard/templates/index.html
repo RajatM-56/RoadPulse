@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadPulse — Smart City Traffic Intelligence Control Center</title>
+  <link rel="icon" type="image/png" href="/static/images/logo.png">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header id="app-header">
+    <div class="logo-area" onclick="showScreen('login')" style="cursor: pointer; display: flex; align-items: center; height: 100%;">
+      <img src="/static/images/logo.png" alt="RoadPulse Logo" style="height: 68px; max-height: 68px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.08)); transition: transform 0.2s ease;">
+    </div>
+
+    <!-- Landing Page Navigation (Shown when logged out / on login screen) -->
+    <nav class="header-nav" id="login-nav">
+      <button class="nav-item active" id="nav-btn-overview" onclick="scrollToLoginSection('overview')">Overview</button>
+      <button class="nav-item" id="nav-btn-features" onclick="scrollToLoginSection('features')">Features</button>
+    </nav>
+
+    <!-- Operational Dashboard Navigation (Shown when logged in) -->
+    <nav class="header-nav" id="main-nav" style="display: none;">
+      <button class="nav-item" onclick="showScreen('dashboard')">Live Dashboard</button>
+      <button class="nav-item" onclick="showScreen('incidents')">Incidents</button>
+      <button class="nav-item" onclick="showScreen('details')">Incident Details</button>
+      <button class="nav-item" onclick="showScreen('cameras')">Cameras & Drones</button>
+      <button class="nav-item" onclick="showScreen('analytics')">Analytics</button>
+      <button class="nav-item" onclick="showScreen('alerts')">Alerts</button>
+      <button class="nav-item" onclick="showScreen('settings')">Settings</button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="btn btn-primary btn-header" id="header-btn" onclick="handleHeaderBtnClick()">Operator Sign In</button>
+    </div>
+  </header>
+
+  <!-- SCREEN 1: LOGIN -->
+  <div id="screen-login" class="screen-container app-container" style="display: flex; align-items: center; justify-content: center; min-height: 82vh;">
+    <div class="login-split-container" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; width: 100%; max-width: 1080px; align-items: center;">
+      
+      <!-- Left Column: Brand Hero -->
+      <div class="login-hero-left" style="display: flex; flex-direction: column; gap: 0.75rem; padding: 0.5rem 1rem 0.5rem 0;">
+        <div style="margin: 0 0 -0.5rem 0; padding: 0; line-height: 1;">
+          <img src="/static/images/logo.png" alt="RoadPulse Logo" style="height: 140px; max-height: 140px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.08));">
+        </div>
+        
+        <h1 style="font-family: var(--font-heading); font-size: 3rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.8px; margin: 0;">
+          <span style="color: #7c2d12;">Detect.</span>
+          <span style="color: #ea580c;">Alert.</span>
+          <span style="color: #16a34a;">Act.</span>
+        </h1>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.85rem; max-width: 520px; margin-top: 0.1rem;">
+          <p style="font-size: 1.02rem; color: #292524; line-height: 1.6; font-weight: 500; margin: 0;">
+            RoadPulse turns live camera and drone feeds into intelligent incident detection, helping teams understand <strong>what</strong> is happening on the road, <strong>where</strong> it is happening, and <strong>how serious</strong> it is.
+          </p>
+
+          <div style="background: rgba(255, 255, 255, 0.55); border-left: 3.5px solid #ea580c; border-top: 1px solid rgba(247, 216, 186, 0.85); border-right: 1px solid rgba(247, 216, 186, 0.85); border-bottom: 1px solid rgba(247, 216, 186, 0.85); padding: 0.75rem 1rem; border-radius: 0 12px 12px 0; backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(124, 45, 18, 0.04);">
+            <p style="font-size: 0.92rem; color: #7c2d12; font-weight: 700; margin: 0; line-height: 1.5; display: flex; align-items: center; gap: 0.55rem;">
+              <i data-lucide="zap" style="width: 16px; color: #ea580c; flex-shrink: 0;"></i>
+              <span>From detection to resolution, RoadPulse gives operators the intelligence they need to act faster.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Glassmorphic Login Card (Compact Sleek Design) -->
+      <div class="card-panel login-glass-card" style="padding: 1.85rem 1.65rem;">
+        <h2 style="font-family: var(--font-heading); font-size: 1.45rem; font-weight: 800; color: #1c1917; margin-bottom: 0.25rem; text-align: center;">Welcome Back</h2>
+        <p style="font-size: 0.82rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.85rem; text-align: center;">Sign in to continue to RoadPulse</p>
+        
+        <div style="background: rgba(254, 231, 199, 0.6); border: 1px dashed #e5b98f; padding: 0.35rem 0.6rem; border-radius: 8px; font-size: 0.72rem; color: #7c2d12; font-weight: 600; text-align: center; margin-bottom: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
+          <i data-lucide="lock" style="width: 13px; height: 13px; color: #ea580c;"></i>
+          <span>For Demo Sign In Credentials are not editable</span>
+        </div>
+
+        <form onsubmit="handleLogin(event)" style="display: flex; flex-direction: column; gap: 0.95rem; text-align: left;">
+          <div>
+            <label style="display: block; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.25rem;">Email</label>
+            <input type="email" class="glass-input" value="operator@elcia.in" readonly required style="width: 100%; padding: 0.65rem 0.85rem; font-size: 0.88rem; cursor: not-allowed; opacity: 0.9;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.25rem;">Password</label>
+            <div style="position: relative;">
+              <input type="password" id="login-password" class="glass-input" value="operator123" readonly required style="width: 100%; padding: 0.65rem 2.5rem 0.65rem 0.85rem; font-size: 0.88rem; cursor: not-allowed; opacity: 0.9;">
+              <button type="button" onclick="togglePasswordVisibility()" title="Toggle password visibility" style="position: absolute; right: 0.65rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0.15rem;">
+                <i data-lucide="eye" id="pw-eye-icon" style="width: 16px; height: 16px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; align-items: center; font-size: 0.78rem;">
+            <a href="#" onclick="alert('Password reset link sent to admin.'); return false;" style="color: #ea580c; text-decoration: none; font-weight: 600;">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.7rem; font-size: 0.9rem; font-weight: 700; margin-top: 0.2rem; justify-content: center; border-radius: 10px; background: #F7D8BA; color: #7c2d12; border: 1px solid #e5b98f; box-shadow: 0 4px 14px rgba(124, 45, 18, 0.12);">Sign In</button>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- Proposal-Aligned Landing Sections -->
+    <div style="width: 100%; max-width: 1080px; margin-top: 3rem; display: flex; flex-direction: column; gap: 2.75rem;">
+      
+      <!-- SECTION 1: FEATURES (Compact Sleek Card UI) -->
+      <div id="features-section" style="scroll-margin-top: 100px;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <span style="font-family: var(--font-heading); font-weight: 700; font-size: 0.75rem; color: #ea580c; background: #FFE7C7; border: 1px solid #F7D8BA; padding: 0.3rem 0.8rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px;">FEATURES</span>
+          <h2 style="font-family: var(--font-heading); font-size: 1.9rem; font-weight: 800; color: #1c1917; margin-top: 0.5rem;">Everything you need for smarter traffic management</h2>
+          <p style="font-size: 0.92rem; color: var(--text-muted); max-width: 660px; margin: 0.35rem auto 0 auto; line-height: 1.45;">RoadPulse turns live camera and drone feeds into intelligent incident detection, helping teams understand what is happening on the road, where it is happening, and how serious it is. From detection to resolution, RoadPulse gives operators the intelligence they need to act faster.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.25rem;">
+          
+          <!-- Card 01 -->
+          <div class="card-panel login-glass-card" style="padding: 1.35rem 1.35rem; position: relative;">
+            <div style="position: absolute; top: 1rem; right: 1rem; font-size: 0.75rem; font-weight: 800; color: #a8a29e;">01</div>
+            <div style="width: 38px; height: 38px; background: #fee2e2; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--accent-rose); margin-bottom: 0.75rem;">
+              <i data-lucide="bell" style="width: 18px;"></i>
+            </div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.05rem; font-weight: 800; color: #1c1917;">Real-Time Incident Detection</h3>
+            <p style="font-size: 0.83rem; color: var(--text-muted); line-height: 1.45; margin: 0.25rem 0 0.85rem 0;">Detect congestion, blockages, wrong-way driving, stalled vehicles and possible collisions in seconds using AI.</p>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+              <span style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.68rem; font-weight: 700;">! Congestion</span>
+              <span style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.68rem; font-weight: 700;">! Blockage</span>
+              <span style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.68rem; font-weight: 700;">! Wrong-Way</span>
+              <span style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.68rem; font-weight: 700;">! Stalled Vehicle</span>
+              <span style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.68rem; font-weight: 700;">! Possible Collision</span>
+            </div>
+          </div>
+
+          <!-- Card 02 -->
+          <div class="card-panel login-glass-card" style="padding: 1.35rem 1.35rem; position: relative;">
+            <div style="position: absolute; top: 1rem; right: 1rem; font-size: 0.75rem; font-weight: 800; color: #a8a29e;">02</div>
+            <div style="width: 38px; height: 38px; background: #dcfce7; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--accent-emerald); margin-bottom: 0.75rem;">
+              <i data-lucide="map" style="width: 18px;"></i>
+            </div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.05rem; font-weight: 800; color: #1c1917;">Live Traffic Intelligence Map</h3>
+            <p style="font-size: 0.83rem; color: var(--text-muted); line-height: 1.45; margin: 0.25rem 0 0.85rem 0;">Get a real-time view of incidents across Electronics City with severity markers and camera coverage insights.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.78rem; color: var(--text-main); font-weight: 600;">
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: var(--accent-emerald);"></i> Severity color coding</div>
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: var(--accent-emerald);"></i> Coverage gap overlay</div>
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: var(--accent-emerald);"></i> Zone & hotspot view</div>
+            </div>
+          </div>
+
+          <!-- Card 03 -->
+          <div class="card-panel login-glass-card" style="padding: 1.35rem 1.35rem; position: relative;">
+            <div style="position: absolute; top: 1rem; right: 1rem; font-size: 0.75rem; font-weight: 800; color: #a8a29e;">03</div>
+            <div style="width: 38px; height: 38px; background: #fef3c7; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #d97706; margin-bottom: 0.75rem;">
+              <i data-lucide="zap" style="width: 18px;"></i>
+            </div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.05rem; font-weight: 800; color: #1c1917;">Smart Severity & Alerts</h3>
+            <p style="font-size: 0.83rem; color: var(--text-muted); line-height: 1.45; margin: 0.25rem 0 0.85rem 0;">Every incident is scored for severity and confidence to help operators focus on what matters most.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.78rem; color: var(--text-main); font-weight: 600;">
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: #d97706;"></i> Severity & confidence scoring</div>
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: #d97706;"></i> Instant dashboard alerts</div>
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: #d97706;"></i> Email / SMS alert simulation</div>
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: #d97706;"></i> Nearest-authority routing</div>
+            </div>
+          </div>
+
+          <!-- Card 04 -->
+          <div class="card-panel login-glass-card" style="padding: 1.35rem 1.35rem; position: relative;">
+            <div style="position: absolute; top: 1rem; right: 1rem; font-size: 0.75rem; font-weight: 800; color: #a8a29e;">04</div>
+            <div style="width: 38px; height: 38px; background: #e0f2fe; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #0284c7; margin-bottom: 0.75rem;">
+              <i data-lucide="video" style="width: 18px;"></i>
+            </div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.05rem; font-weight: 800; color: #1c1917;">Evidence-Backed Incidents</h3>
+            <p style="font-size: 0.83rem; color: var(--text-muted); line-height: 1.45; margin: 0.25rem 0 0.85rem 0;">Every alert comes with visual evidence so teams can verify and act with confidence.</p>
+            
+            <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+              <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.76rem; color: var(--text-main); font-weight: 600; flex: 1;">
+                <div style="display: flex; align-items: center; gap: 0.3rem;"><i data-lucide="check-circle" style="width: 13px; color: #0284c7;"></i> Snapshot & video clip</div>
+                <div style="display: flex; align-items: center; gap: 0.3rem;"><i data-lucide="check-circle" style="width: 13px; color: #0284c7;"></i> Vehicle trajectory</div>
+                <div style="display: flex; align-items: center; gap: 0.3rem;"><i data-lucide="check-circle" style="width: 13px; color: #0284c7;"></i> Timestamp & confidence</div>
+              </div>
+              <div style="width: 68px; height: 50px; background: #1c1917; border-radius: 6px; overflow: hidden; position: relative; flex-shrink: 0;">
+                <img src="/static/images/login_bg.jpg" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 18px; height: 18px; background: rgba(2, 132, 199, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff;">
+                  <i data-lucide="play" style="width: 10px; fill: #fff;"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 05 -->
+          <div class="card-panel login-glass-card" style="padding: 1.35rem 1.35rem; position: relative;">
+            <div style="position: absolute; top: 1rem; right: 1rem; font-size: 0.75rem; font-weight: 800; color: #a8a29e;">05</div>
+            <div style="width: 38px; height: 38px; background: #f3e8ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #7c3aed; margin-bottom: 0.75rem;">
+              <i data-lucide="clipboard-list" style="width: 18px;"></i>
+            </div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.05rem; font-weight: 800; color: #1c1917;">Incident Tracking</h3>
+            <p style="font-size: 0.83rem; color: var(--text-muted); line-height: 1.45; margin: 0.25rem 0 0.85rem 0;">Track every incident from detection to resolution with a clear lifecycle.</p>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.7); padding: 0.35rem 0.6rem; border-radius: 6px; border: 1px solid #F7D8BA; margin-bottom: 0.6rem; font-size: 0.68rem; font-weight: 700;">
+              <span style="color: #0284c7;">● New</span>
+              <span style="color: #a8a29e;">→</span>
+              <span style="color: #d97706;">● Ack</span>
+              <span style="color: #a8a29e;">→</span>
+              <span style="color: #059669;">● Resolved</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.78rem; color: var(--text-main); font-weight: 600;">
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: #7c3aed;"></i> Incident ID, type, location</div>
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: #7c3aed;"></i> Current status & severity</div>
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: #7c3aed;"></i> Resolution time & history</div>
+            </div>
+          </div>
+
+          <!-- Card 06 -->
+          <div class="card-panel login-glass-card" style="padding: 1.35rem 1.35rem; position: relative;">
+            <div style="position: absolute; top: 1rem; right: 1rem; font-size: 0.75rem; font-weight: 800; color: #a8a29e;">06</div>
+            <div style="width: 38px; height: 38px; background: #ccfbf1; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #0d9488; margin-bottom: 0.75rem;">
+              <i data-lucide="bar-chart-2" style="width: 18px;"></i>
+            </div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.05rem; font-weight: 800; color: #1c1917;">Traffic Analytics</h3>
+            <p style="font-size: 0.83rem; color: var(--text-muted); line-height: 1.45; margin: 0.25rem 0 0.85rem 0;">Understand patterns and trends to plan better and reduce future incidents.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.78rem; color: var(--text-main); font-weight: 600;">
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: #0d9488;"></i> Incidents by zone</div>
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: #0d9488;"></i> Incidents by time of day</div>
+              <div style="display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="check-circle" style="width: 14px; color: #0d9488;"></i> Severity distribution & trends</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: LIVE DASHBOARD -->
+  <div id="screen-dashboard" class="screen-container app-container" style="display: none;">
+    <!-- Top Summary Stat Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-title">Active Incident Alerts</span>
+        <span class="stat-value" id="stat-incidents" style="color: var(--accent-rose);">3</span>
+        <span class="stat-subtext">2 Critical &bull; 1 Warning</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">High Severity</span>
+        <span class="stat-value" style="color: var(--accent-rose);">2</span>
+        <span class="stat-subtext">Immediate Operator Action</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Medium Severity</span>
+        <span class="stat-value" style="color: var(--accent-amber);">1</span>
+        <span class="stat-subtext">Monitoring Required</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Low Severity</span>
+        <span class="stat-value" style="color: var(--primary-blue);">0</span>
+        <span class="stat-subtext">Normal Traffic Flow</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Cameras Online</span>
+        <span class="stat-value" style="color: var(--accent-emerald);">4 / 4</span>
+        <span class="stat-subtext">2 CCTV &bull; 2 Drone UAVs</span>
+      </div>
+    </div>
+
+    <!-- Electronics City Map & Coverage Gap Overlay -->
+    <div class="card-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i data-lucide="map-pin" style="color: var(--primary-blue);"></i>
+          <span>Electronics City Traffic Operations Map & Coverage-Gap Overlay</span>
+        </div>
+        <span class="badge" style="background: #dcfce7; color: var(--accent-emerald);">● Live Zone Grid Active</span>
+      </div>
+      <div class="map-grid-container" id="zone-grid"></div>
+    </div>
+
+    <!-- Main Workspace Split Grid -->
+    <div class="main-workspace">
+      <!-- Video Stream Workspace -->
+      <div class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i data-lucide="camera" style="color: var(--primary-blue);"></i>
+            <span id="player-title">Fixed Camera Traffic — Incident Alerts Stream</span>
+          </div>
+          <select id="clip-select" class="btn" onchange="changeClipSource()">
+            <option value="fixed_cam_sample">Fixed Camera (Traffic Junction)</option>
+            <option value="drone_sample">Drone Camera (Aerial View)</option>
+          </select>
+        </div>
+
+        <div class="video-container">
+          <video id="main-video" controls autoplay loop muted>
+            <source src="/media/outputs/incidents/fixed_cam_sample_incidents.mp4" type="video/mp4">
+          </video>
+        </div>
+
+        <div class="video-controls-row">
+          <button class="btn btn-primary" onclick="setVideoLayer('incidents')"><i data-lucide="shield-alert"></i> Incident Alerts</button>
+          <button class="btn" onclick="setVideoLayer('tracked')"><i data-lucide="route"></i> Tracked Stream</button>
+          <button class="btn" onclick="setVideoLayer('annotated')"><i data-lucide="eye"></i> Batch Detections</button>
+          <button class="btn" onclick="setVideoLayer('raw')"><i data-lucide="video-off"></i> Raw Feed</button>
+        </div>
+      </div>
+
+      <!-- Recent Incidents Event Feed -->
+      <div class="card-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i data-lucide="bell" style="color: var(--accent-rose);"></i>
+            <span>Recent Event Feed</span>
+          </div>
+          <button class="btn" onclick="showScreen('incidents')" style="font-size: 0.78rem;">View All Incidents</button>
+        </div>
+        <div class="event-feed-list" id="incident-feed-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: INCIDENTS TABLE -->
+  <div id="screen-incidents" class="screen-container app-container" style="display: none;">
+    <div class="card-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i data-lucide="list-filter" style="color: var(--primary-blue);"></i>
+          <span>Incident Management Register</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="text" id="inc-search" placeholder="Search by ID, Zone, Type..." oninput="filterIncidentsTable()" style="padding: 0.45rem 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.82rem;">
+          <select id="inc-type-filter" class="btn" onchange="filterIncidentsTable()">
+            <option value="ALL">All Incident Types</option>
+            <option value="Traffic Violation (Wrong-Way)">Traffic Violation</option>
+            <option value="Blockage & Obstruction">Blockage & Obstruction</option>
+            <option value="Congestion & Flow Reduction">Congestion & Flow</option>
+            <option value="Collision-Linked Congestion">Collision-Linked</option>
+          </select>
+          <select id="inc-status-filter" class="btn" onchange="filterIncidentsTable()">
+            <option value="ALL">All Statuses</option>
+            <option value="New">New</option>
+            <option value="Acknowledged">Acknowledged</option>
+            <option value="Resolved">Resolved</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Incident ID</th>
+              <th>Type</th>
+              <th>Location / Zone</th>
+              <th>Severity</th>
+              <th>Confidence</th>
+              <th>Timestamp</th>
+              <th>Status</th>
+              <th>Investigate</th>
+            </tr>
+          </thead>
+          <tbody id="incidents-table-body">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: INCIDENT DETAILS (EVIDENCE INVESTIGATION) -->
+  <div id="screen-details" class="screen-container app-container" style="display: none;">
+    <div class="card-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i data-lucide="search" style="color: var(--primary-blue);"></i>
+          <span id="det-title">Incident Evidence Investigation — INC-VIO-4</span>
+        </div>
+        <button class="btn" onclick="showScreen('incidents')"><i data-lucide="arrow-left"></i> Back to Incidents</button>
+      </div>
+
+      <!-- Fuzzy Warning for Collision-Linked Congestion -->
+      <div id="collision-warning-banner" style="display: none; background: #fef3c7; border: 1px solid #fde68a; border-left: 4px solid var(--accent-amber); padding: 0.85rem 1.25rem; border-radius: 10px; font-size: 0.88rem; color: #92400e; font-weight: 600;">
+        ⚠️ <strong>Possible Incident — Verify</strong>: Cascading deceleration detected. Requires operator verification per proposal safety guidelines.
+      </div>
+
+      <div class="main-workspace">
+        <div class="card-panel" style="padding: 0; border: none; box-shadow: none;">
+          <div class="video-container">
+            <video id="det-video" controls autoplay loop muted>
+              <source src="/media/outputs/incidents/fixed_cam_sample_incidents.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <div class="card-panel">
+          <h3 style="font-family: var(--font-heading); font-size: 1.1rem; color: #0f172a; margin-bottom: 0.75rem;">Evidence & AI Telemetry</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem;">
+            <div><strong>Incident Type:</strong> <span id="det-type" style="color: var(--accent-rose); font-weight: 700;">Traffic Violation (Wrong-Way)</span></div>
+            <div><strong>Severity Score:</strong> <span id="det-sev" class="sev-badge sev-high">0.95</span></div>
+            <div><strong>AI Confidence:</strong> <span id="det-conf">92%</span></div>
+            <div><strong>Location Zone:</strong> <span id="det-zone">Lane_Sector_(3, 2)</span></div>
+            <div><strong>Timestamp:</strong> <span id="det-time">2.8 seconds</span></div>
+            <div><strong>Source Camera:</strong> Fixed Camera (Phase 1 Gate Junction)</div>
+          </div>
+
+          <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <h4 style="font-size: 0.82rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; margin-bottom: 0.4rem;">AI Rule Engine Logic</h4>
+            <p id="det-logic" style="font-size: 0.82rem; color: var(--text-muted); background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color);">
+              Track ID 4 direction vector [-1.0, 0.029] opposes expected lane flow vector [1.0, 0.0] with cosine dot product -0.99 (Threshold: -0.60).
+            </p>
+          </div>
+
+          <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem;">
+            <button class="btn btn-primary" onclick="updateCurrentDetailStatus('Acknowledged')">Acknowledge Incident</button>
+            <button class="btn" style="border-color: var(--accent-emerald); color: var(--accent-emerald);" onclick="updateCurrentDetailStatus('Resolved')">Mark Resolved</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 5: CAMERAS & DRONES -->
+  <div id="screen-cameras" class="screen-container app-container" style="display: none;">
+    <div class="card-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i data-lucide="video" style="color: var(--primary-blue);"></i>
+          <span>Cameras & Drone UAV Coverage Monitor</span>
+        </div>
+      </div>
+      <div class="map-grid-container" id="cameras-grid-container"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 6: ANALYTICS -->
+  <div id="screen-analytics" class="screen-container app-container" style="display: none;">
+    <div class="card-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i data-lucide="bar-chart-3" style="color: var(--primary-blue);"></i>
+          <span>Incident Frequency & Operational Performance Analytics</span>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-title">Incident Recall</span>
+          <span class="stat-value" style="color: var(--accent-emerald);">78.5%</span>
+          <span class="stat-subtext">Target: ≥ 70.0%</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-title">False Alarm Rate</span>
+          <span class="stat-value" style="color: var(--accent-amber);">2.1%</span>
+          <span class="stat-subtext">Minimised on Normal Traffic</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-title">Detection Time RMSE</span>
+          <span class="stat-value" style="color: var(--primary-blue);">1.42s</span>
+          <span class="stat-subtext">Blockage / Collision Classes</span>
+        </div>
+      </div>
+
+      <div class="main-workspace" style="margin-top: 1rem;">
+        <div class="card-panel">
+          <h3 style="font-family: var(--font-heading); font-size: 1rem; color: #0f172a;">Incidents by Zone</h3>
+          <div id="analytics-zones" style="display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem;"></div>
+        </div>
+        <div class="card-panel">
+          <h3 style="font-family: var(--font-heading); font-size: 1rem; color: #0f172a;">Incidents by Time of Day</h3>
+          <div id="analytics-time" style="display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 7: ALERTS -->
+  <div id="screen-alerts" class="screen-container app-container" style="display: none;">
+    <div class="card-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i data-lucide="bell-ring" style="color: var(--accent-rose);"></i>
+          <span>Active & Historical Alerts Register</span>
+        </div>
+      </div>
+      <div class="event-feed-list" id="alerts-page-container"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 8: SETTINGS -->
+  <div id="screen-settings" class="screen-container app-container" style="display: none;">
+    <div class="card-panel" style="max-width: 700px; margin: 0 auto; width: 100%;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i data-lucide="settings" style="color: var(--primary-blue);"></i>
+          <span>Operational System Settings</span>
+        </div>
+      </div>
+
+      <form onsubmit="saveSettings(event)" style="display: flex; flex-direction: column; gap: 1.25rem;">
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Congestion Speed Threshold (px/s)</label>
+          <input type="number" id="set-cong-speed" value="30" style="width: 100%; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; margin-top: 0.3rem;">
+        </div>
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Blockage Dwell Threshold (frames)</label>
+          <input type="number" id="set-block-dwell" value="40" style="width: 100%; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; margin-top: 0.3rem;">
+        </div>
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Dispatch Authority Destination</label>
+          <input type="text" id="set-dispatch" value="ELCIA Security Station 2 & Traffic Control" style="width: 100%; padding: 0.6rem; border: 1px solid var(--border-color); border-radius: 8px; margin-top: 0.3rem;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="padding: 0.75rem; font-size: 0.9rem;">Save System Settings</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCREEN 9: EXECUTION CONSOLE -->
+  <div id="screen-control" class="screen-container app-container" style="display: none;">
+    <div class="card-panel" id="control-panel" style="width: 100%;">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i data-lucide="terminal" style="color: var(--primary-blue);"></i>
+          <span>Pipeline Live Execution Console</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn" onclick="triggerTask('run_pipeline')">Run Full E2E Pipeline</button>
+          <button class="btn" onclick="triggerTask('incidents')">Run Incident Engine</button>
+          <button class="btn" onclick="triggerTask('track_bytetrack')">Run ByteTrack</button>
+          <button class="btn" onclick="triggerTask('track_botsort')">Run BoT-SORT (Drone)</button>
+        </div>
+      </div>
+
+      <div class="console-box" id="console-output">
+        <div class="console-line">[READY] RoadPulse Operational Intelligence Control Center ready.</div>
+        <div class="console-line">[INFO] Pipeline Console initialized. Select a task above to execute live YOLO detection or ByteTrack tracking.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simulated Dispatch & Alert Modal -->
+  <div id="alert-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+        <h3 style="color: var(--accent-rose); font-family: var(--font-heading); display: flex; align-items: center; gap: 0.5rem;">
+          <i data-lucide="alert-triangle"></i> HIGH SEVERITY INCIDENT ALERT
+        </h3>
+        <button onclick="closeAlertModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem;">&times;</button>
+      </div>
+      <div id="modal-content" style="font-size: 0.9rem; line-height: 1.6; color: var(--text-main);"></div>
+      <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.78rem; color: var(--text-muted);">Email/SMS Dispatch Stub: <strong>SENT to Traffic Operations</strong></span>
+        <button class="btn btn-primary" onclick="closeAlertModal()">Acknowledge Alert</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 0.65rem;">
+      <img src="/static/images/logo.png" alt="RoadPulse" style="height: 24px; width: auto; object-fit: contain;">
+      <span>RoadPulse Traffic Incident Intelligence System</span>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
