@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: roadpulse
+    runtime: python
+    plan: free
+    healthCheckPath: /
+    buildCommand: "pip install --upgrade pip && pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu && pip install -r requirements.txt"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT dashboard.server:app"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
+      - key: OMP_NUM_THREADS
+        value: "1"
