@@ -1,0 +1,104 @@
+{
+  "clip_id": "drone_sample",
+  "total_incidents": 7,
+  "incidents": [
+    {
+      "incident_id": "INC-BLK-DRONE-01",
+      "type": "Blockage & Obstruction",
+      "severity": 0.82,
+      "confidence": 0.78,
+      "zone": "Wipro Avenue Drone Sector",
+      "location": [
+        429,
+        200
+      ],
+      "timestamp_s": 8.2,
+      "track_id": 121,
+      "lifecycle_status": "New"
+    },
+    {
+      "incident_id": "INC-BLK-DRONE-02",
+      "type": "Blockage & Obstruction",
+      "severity": 0.82,
+      "confidence": 0.78,
+      "zone": "Wipro Avenue Drone Sector",
+      "location": [
+        296,
+        217
+      ],
+      "timestamp_s": 7.6,
+      "track_id": 130,
+      "lifecycle_status": "New"
+    },
+    {
+      "incident_id": "INC-VIO-DRONE-03",
+      "type": "Traffic Violation (Wrong-Way)",
+      "severity": 0.9,
+      "confidence": 0.82,
+      "zone": "Wipro Avenue Drone Sector",
+      "location": [
+        319,
+        120
+      ],
+      "timestamp_s": 5.2,
+      "track_id": 138,
+      "lifecycle_status": "New"
+    },
+    {
+      "incident_id": "INC-VIO-DRONE-04",
+      "type": "Traffic Violation (Wrong-Way)",
+      "severity": 0.9,
+      "confidence": 0.82,
+      "zone": "Wipro Avenue Drone Sector",
+      "location": [
+        339,
+        36
+      ],
+      "timestamp_s": 4.8,
+      "track_id": 140,
+      "lifecycle_status": "New"
+    },
+    {
+      "incident_id": "INC-BLK-DRONE-05",
+      "type": "Blockage & Obstruction",
+      "severity": 0.82,
+      "confidence": 0.78,
+      "zone": "Wipro Avenue Drone Sector",
+      "location": [
+        331,
+        144
+      ],
+      "timestamp_s": 4.5,
+      "track_id": 144,
+      "lifecycle_status": "New"
+    },
+    {
+      "incident_id": "INC-VIO-DRONE-06",
+      "type": "Traffic Violation (Wrong-Way)",
+      "severity": 0.9,
+      "confidence": 0.82,
+      "zone": "Wipro Avenue Drone Sector",
+      "location": [
+        331,
+        144
+      ],
+      "timestamp_s": 4.5,
+      "track_id": 144,
+      "lifecycle_status": "New"
+    },
+    {
+      "incident_id": "INC-BLK-DRONE-07",
+      "type": "Blockage & Obstruction",
+      "severity": 0.82,
+      "confidence": 0.78,
+      "zone": "Wipro Avenue Drone Sector",
+      "location": [
+        39,
+        225
+      ],
+      "timestamp_s": 2.3,
+      "track_id": 156,
+      "lifecycle_status": "New"
+    }
+  ]
+}

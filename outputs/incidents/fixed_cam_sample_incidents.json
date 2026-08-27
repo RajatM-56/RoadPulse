@@ -1,0 +1,84 @@
+{
+  "incidents": [
+    {
+      "incident_id": "INC-BLK-01",
+      "type": "Blockage & Obstruction",
+      "track_id": 14,
+      "class_name": "car",
+      "zone": "Phase 1 Main Gate",
+      "timestamp_s": 12.4,
+      "duration_frames": 180,
+      "location": [
+        240,
+        180
+      ],
+      "severity": 0.88,
+      "confidence": 0.94,
+      "lifecycle_status": "New"
+    },
+    {
+      "incident_id": "INC-CONG-02",
+      "type": "Congestion & Flow Reduction",
+      "track_id": 8,
+      "class_name": "truck",
+      "zone": "Hosur Rd Flyover Junction",
+      "timestamp_s": 34.1,
+      "duration_frames": 120,
+      "location": [
+        310,
+        220
+      ],
+      "severity": 0.65,
+      "confidence": 0.89,
+      "lifecycle_status": "Acknowledged"
+    },
+    {
+      "incident_id": "INC-VIO-03",
+      "type": "Traffic Violation (Wrong-Way)",
+      "track_id": 21,
+      "class_name": "motorcycle",
+      "zone": "Wipro Avenue Sector",
+      "timestamp_s": 58.7,
+      "duration_frames": 45,
+      "location": [
+        150,
+        110
+      ],
+      "severity": 0.92,
+      "confidence": 0.91,
+      "lifecycle_status": "New"
+    },
+    {
+      "incident_id": "INC-COL-04",
+      "type": "Collision-Linked Congestion",
+      "track_id": 5,
+      "class_name": "car",
+      "zone": "Phase 1 Main Gate",
+      "timestamp_s": 82.3,
+      "duration_frames": 210,
+      "location": [
+        280,
+        190
+      ],
+      "severity": 0.78,
+      "confidence": 0.72,
+      "lifecycle_status": "New"
+    },
+    {
+      "incident_id": "INC-BLK-05",
+      "type": "Blockage & Obstruction",
+      "track_id": 33,
+      "class_name": "bus",
+      "zone": "Electronic City Metro Stn",
+      "timestamp_s": 115.0,
+      "duration_frames": 150,
+      "location": [
+        400,
+        260
+      ],
+      "severity": 0.82,
+      "confidence": 0.95,
+      "lifecycle_status": "Resolved"
+    }
+  ]
+}
