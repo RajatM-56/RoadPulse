@@ -367,6 +367,24 @@ def main():
 
     print(f"  ✓ Incident alerts saved → {OUT_INC_JSON}  ({len(incidents)} incidents)")
     print(f"  ✓ Annotated video saved → {OUT_INC_VID}")
+
+    # Auto-convert videos to H.264 for browser compatibility
+    import subprocess
+    print("\n[POST-PROCESS] Converting videos to H.264 (avc1) for browser compatibility...")
+    for vid_path in [OUT_TRACK_VID, OUT_INC_VID]:
+        temp_path = vid_path.replace(".mp4", "_h264.mp4")
+        ff_cmd = [
+            "ffmpeg", "-y", "-i", vid_path,
+            "-vcodec", "libx264", "-pix_fmt", "yuv420p",
+            "-loglevel", "error", temp_path
+        ]
+        try:
+            subprocess.run(ff_cmd, check=True)
+            os.replace(temp_path, vid_path)
+            print(f"  ✓ Converted to H.264 → {vid_path}")
+        except Exception as e:
+            print(f"  ⚠ FFMPEG conversion failed for {vid_path}: {e}")
+
     print("\n" + "=" * 60)
     print(f"  ✓ Pipeline complete  |  Tracks: {len(kin_out)}  |  Incidents: {len(incidents)}")
     print("=" * 60)
