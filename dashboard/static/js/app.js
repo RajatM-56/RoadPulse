@@ -196,7 +196,7 @@ function handleLogout() {
 }
 
 // Close profile dropdown when clicking anywhere outside
-document.addEventListener("click", function(e) {
+document.addEventListener("click", function (e) {
   const container = document.getElementById("user-profile-menu-container");
   const dropdown = document.getElementById("profile-dropdown");
   if (dropdown && container && !container.contains(e.target)) {
@@ -224,18 +224,18 @@ async function fetchSummary() {
 
       // High / Med severity counts
       const highCount = data.incidents.filter(i => i.severity >= 0.75).length;
-      const medCount  = data.incidents.filter(i => i.severity >= 0.4 && i.severity < 0.75).length;
+      const medCount = data.incidents.filter(i => i.severity >= 0.4 && i.severity < 0.75).length;
       const resolvedCount = data.incidents.filter(i => i.lifecycle_status === "Resolved").length;
 
       const highEl = document.getElementById("stat-high-sev");
-      const medEl  = document.getElementById("stat-med-sev");
-      const resEl  = document.getElementById("stat-resolved");
-      const subEl  = document.getElementById("stat-incidents-sub");
+      const medEl = document.getElementById("stat-med-sev");
+      const resEl = document.getElementById("stat-resolved");
+      const subEl = document.getElementById("stat-incidents-sub");
 
       if (highEl) highEl.innerText = highCount;
-      if (medEl)  medEl.innerText  = medCount;
-      if (resEl)  resEl.innerText  = resolvedCount;
-      if (subEl)  subEl.innerText  = `${highCount} Critical · ${medCount} Warning`;
+      if (medEl) medEl.innerText = medCount;
+      if (resEl) resEl.innerText = resolvedCount;
+      if (subEl) subEl.innerText = `${highCount} Critical · ${medCount} Warning`;
 
       renderIncidentFeed(data.incidents);
       renderIncidentsTable(data.incidents);
@@ -371,7 +371,7 @@ function quickResolveAll() {
 // --- Video Fullscreen Toggle ---
 function toggleVideoFullscreen() {
   const wrap = document.getElementById("video-container-wrap");
-  const btn  = document.querySelector("[onclick='toggleVideoFullscreen()']");
+  const btn = document.querySelector("[onclick='toggleVideoFullscreen()']");
   if (!wrap) return;
 
   if (wrap.classList.contains("fullscreen-mode")) {
@@ -424,7 +424,14 @@ function renderZoneGrid(zones) {
 
   container.innerHTML = zones.map(z => {
     const statusColor = z.status === "critical" ? "var(--accent-rose)" : (z.status === "warning" ? "var(--accent-amber)" : "var(--accent-emerald)");
-    const statusText = z.status === "critical" ? "2 Active Alerts" : (z.status === "warning" ? "1 Warning" : "Normal Flow");
+    const count = z.incident_count || 0;
+    const highCount = z.high_severity_count || 0;
+    let statusText = "Normal Flow";
+    if (z.status === "critical") {
+      statusText = `${count} Active Alert${count > 1 ? 's' : ''} (${highCount} Critical)`;
+    } else if (z.status === "warning") {
+      statusText = `${count} Warning${count > 1 ? 's' : ''}`;
+    }
 
     return `
       <div class="zone-card ${z.status}">
@@ -667,7 +674,8 @@ async function applyBatchStatus(newStatus) {
 }
 
 function exportIncidentsCSV() {
-  downloadCSV(allIncidents, "RoadPulse_Incident_Register_Full.csv");
+  window.location.href = "/api/export/csv";
+  showToast("📥 Downloading RoadPulse_Incident_Register_Full.csv", "success");
 }
 
 function exportSelectedCSV() {
@@ -679,25 +687,26 @@ function exportSelectedCSV() {
 function downloadCSV(items, filename) {
   if (!items || items.length === 0) return;
 
-  const headers = ["Incident ID", "Type", "Location Zone", "Urgency", "Timestamp (s)", "Status"];
+  const headers = ["Incident ID", "Type", "Location Zone", "Urgency", "Timestamp (s)", "Confidence", "Status"];
   const rows = items.map(i => [
     `"${i.incident_id}"`,
     `"${i.type}"`,
     `"${i.zone || 'Electronics_City'}"`,
     i.severity.toFixed(2),
     `${i.timestamp_s || 0}`,
+    `${i.confidence !== undefined ? i.confidence.toFixed(2) : ''}`,
     `"${i.lifecycle_status || 'New'}"`
   ]);
 
   const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", filename);
+  link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent);
+  link.download = filename;
+  link.style.display = "none";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  showToast(`📥 Downloaded ${filename} (${items.length} incidents)`, "success");
 }
 
 function viewIncidentDetails(incidentId) {
@@ -1085,25 +1094,55 @@ function switchActiveStream(camId, camName, videoPath) {
   const isDrone = camId.toLowerCase().includes("drone") || camName.toLowerCase().includes("drone");
   currentClip = isDrone ? "drone_sample" : "fixed_cam_sample";
 
-  const player = document.getElementById("video-player");
-  const headerText = document.getElementById("video-stream-title");
+  // Navigate to dashboard first, then update player
+  showScreen("dashboard");
 
-  if (player) {
-    player.src = videoPath;
-    player.load();
-    player.play().catch(e => console.log("Stream play check:", e));
+  // Sync the clip-select dropdown
+  const select = document.getElementById("clip-select");
+  if (select) select.value = currentClip;
+
+  // Set to incidents layer so we show the AI-annotated feed
+  currentLayer = "incidents";
+  const videoSrc = `/media/outputs/incidents/${currentClip}_incidents.mp4`;
+
+  // Update the main dashboard video player
+  const video = document.getElementById("main-video");
+  if (video) {
+    video.src = videoSrc;
+    video.load();
+    video.play().catch(e => console.log("Autoplay prevented:", e));
   }
 
-  if (headerText) {
-    headerText.innerText = `${camName.toUpperCase()} | LIVE CONTROL STREAM`;
+  // Update the player title label
+  const titleEl = document.getElementById("player-title");
+  const camLabel = isDrone ? "Drone Aerial" : "Fixed Camera (Traffic Junction)";
+  if (titleEl) titleEl.innerText = `${camLabel} — Incident Alerts Stream`;
+
+  // Sync the AI Overlay / Raw Feed toggle buttons
+  const btnInc = document.getElementById("btn-layer-incidents");
+  const btnRaw = document.getElementById("btn-layer-raw");
+  if (btnInc) btnInc.classList.add("btn-primary");
+  if (btnRaw) btnRaw.classList.remove("btn-primary");
+
+  // Flash-highlight the video panel
+  const panel = document.getElementById("video-panel");
+  if (panel) {
+    panel.style.transition = "box-shadow 0.2s ease";
+    panel.style.boxShadow = "0 0 0 3px var(--primary-blue)";
+    setTimeout(() => { panel.style.boxShadow = ""; }, 1400);
   }
 
-  // Reload telemetry data for selected clip
+  // Scroll video into view
+  const wrap = document.getElementById("video-container-wrap");
+  if (wrap) wrap.scrollIntoView({ behavior: "smooth", block: "center" });
+
+  // Reload summary data for updated zone/incident state
   fetchSummary();
 
-  showToast(`📹 Switched live stream feed to ${camName}!`, "info");
-  showScreen("dashboard");
+  const typeLabel = isDrone ? "🚁 Drone UAV" : "📷 Fixed CCTV";
+  showToast(`${typeLabel} stream switched → ${camName}`, "info");
 }
+
 
 let chartIncidentDonutInstance = null;
 let chartZoneBarsInstance = null;
@@ -1445,10 +1484,10 @@ function setVideoLayer(layer) {
 function updateVideoSource() {
   const video = document.getElementById("main-video");
   const titleEl = document.getElementById("player-title");
-  
+
   let src = "";
   let layerLabel = "";
-  
+
   if (currentLayer === "incidents") {
     src = `/media/outputs/incidents/${currentClip}_incidents.mp4`;
     layerLabel = "Incident Alerts Stream";
@@ -1462,12 +1501,12 @@ function updateVideoSource() {
     src = `/media/data/sample_clips/${currentClip}.mp4`;
     layerLabel = "Raw Feed";
   }
-  
+
   const clipNameLabel = currentClip === "drone_sample" ? "Drone Aerial" : "Fixed Camera Traffic";
   if (titleEl) {
     titleEl.innerText = `${clipNameLabel} — ${layerLabel}`;
   }
-  
+
   if (video) {
     video.src = src;
     video.play().catch(e => console.log("Autoplay prevented:", e));
@@ -1489,7 +1528,7 @@ function triggerTask(taskType) {
   }).then(response => {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    
+
     function readChunk() {
       reader.read().then(({ done, value }) => {
         if (done) {

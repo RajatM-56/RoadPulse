@@ -106,13 +106,40 @@ def get_summary():
                 "has_incidents": (PROJECT_ROOT / "outputs" / "incidents" / f"{v.stem}_incidents.json").exists(),
             })
 
-    # Zone Map Structure
-    zones = [
-        {"id": "Zone_A", "name": "Phase 1 Main Gate", "status": "critical", "incident_count": 2, "coverage_gap": False},
-        {"id": "Zone_B", "name": "Hosur Rd Flyover Junction", "status": "warning", "incident_count": 1, "coverage_gap": False},
-        {"id": "Zone_C", "name": "Electronic City Metro Stn", "status": "normal", "incident_count": 0, "coverage_gap": False},
-        {"id": "Zone_D", "name": "Wipro Avenue Drone Sector", "status": "normal", "incident_count": 0, "coverage_gap": True},
+    # Zone Map Structure — dynamically computed from real incident data
+    zone_definitions = [
+        {"id": "Zone_A", "name": "Phase 1 Main Gate", "coverage_gap": False},
+        {"id": "Zone_B", "name": "Hosur Rd Flyover Junction", "coverage_gap": False},
+        {"id": "Zone_C", "name": "Electronic City Metro Stn", "coverage_gap": False},
+        {"id": "Zone_D", "name": "Wipro Avenue Drone Sector", "coverage_gap": True},
     ]
+
+    zones = []
+    for zdef in zone_definitions:
+        # Count active (non-resolved) incidents whose zone matches this zone name
+        zone_incidents = [
+            inc for inc in incidents_list
+            if inc.get("zone", "").startswith(zdef["name"].split(" ")[0])
+            and inc.get("lifecycle_status", "New") != "Resolved"
+        ]
+        high_count = sum(1 for inc in zone_incidents if inc.get("severity", 0) >= 0.75)
+        total_count = len(zone_incidents)
+
+        if high_count >= 1:
+            status = "critical"
+        elif total_count >= 1:
+            status = "warning"
+        else:
+            status = "normal"
+
+        zones.append({
+            "id": zdef["id"],
+            "name": zdef["name"],
+            "status": status,
+            "incident_count": total_count,
+            "high_severity_count": high_count,
+            "coverage_gap": zdef["coverage_gap"],
+        })
 
     return jsonify({
         "status": "online",
@@ -223,6 +250,54 @@ def update_incident_status():
         INCIDENT_LIFECYCLE[inc_id] = new_status
         return jsonify({"success": True, "incident_id": inc_id, "status": new_status})
     return jsonify({"error": "Invalid incident ID or status"}), 400
+
+@app.route("/api/export/csv")
+def export_csv():
+    """Export all incidents as a properly named CSV file."""
+    import csv
+    import io
+
+    # Gather incidents (same logic as get_summary)
+    incidents_dir = PROJECT_ROOT / "outputs" / "incidents"
+    incidents_list = []
+    if incidents_dir.exists():
+        for inc_file in incidents_dir.glob("*_incidents.json"):
+            try:
+                with open(inc_file, "r") as f:
+                    content = json.load(f)
+                    for inc in content.get("incidents", []):
+                        inc_id = inc.get("incident_id")
+                        inc["lifecycle_status"] = INCIDENT_LIFECYCLE.get(inc_id, "New")
+                        incidents_list.append(inc)
+            except Exception:
+                pass
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Incident ID", "Type", "Location Zone", "Urgency", "Timestamp (s)", "Confidence", "Status"])
+
+    for inc in incidents_list:
+        writer.writerow([
+            inc.get("incident_id", ""),
+            inc.get("type", ""),
+            inc.get("zone", "Electronics_City"),
+            f"{inc.get('severity', 0):.2f}",
+            inc.get("timestamp_s", 0),
+            f"{inc.get('confidence', 0):.2f}" if inc.get("confidence") is not None else "",
+            inc.get("lifecycle_status", "New"),
+        ])
+
+    csv_content = output.getvalue()
+    output.close()
+
+    return Response(
+        csv_content,
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=RoadPulse_Incident_Register_Full.csv",
+            "Content-Type": "text/csv; charset=utf-8",
+        }
+    )
 
 @app.route("/api/kinematics/<clip_id>")
 def get_kinematics(clip_id):

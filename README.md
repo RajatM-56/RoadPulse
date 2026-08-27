@@ -62,3 +62,14 @@ python pipeline/detect.py \
 | 2 | — | Fine-tuning on BMD-45, multi-object tracking |
 | 3 | — | Incident classification + severity scoring |
 | 4 | — | Evaluation + metrics reporting |
+
+## Deployment (Render)
+
+This repository includes a `render.yaml` blueprint configuration to deploy the interactive dashboard.
+
+To deploy:
+1. Sign in to your [Render Dashboard](https://dashboard.render.com/).
+2. Click **New** > **Blueprint**.
+3. Connect your repository.
+4. Render will automatically pick up the `render.yaml` configuration, pre-install the CPU-optimized PyTorch build to stay within memory limits, install dependencies, and launch the web server.
+
